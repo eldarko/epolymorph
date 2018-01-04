@@ -154,7 +154,7 @@ _redis_storage.erl_:
     set(Conn, Key, Value) ->
         redis_command(Conn, ["SET", Key, Value]).
 
-## Step 1: Prepare your modules to instances of epolymorph
+## Step 1: Prepare your modules to be an instance
 
 Each instance should implement behaviour `epolymorph_instance_spec` which defines factory method `epolymorph_create/1`.
 

@@ -93,12 +93,12 @@ _servermodule.erl_:
 
     -export([callme/1]).
   
-  % servermodule could be used as a behaviour thus
-  % compile-time check of an implementation could be used
+    % servermodule could be used as a behaviour thus
+    % compile-time check of an implementation could be used
     -callback callme() -> ok.
   
-  % Next one unifies the process of creating instances of 'servermodule'
-  create(Module, Arguments) ->
+    % Next one unifies the process of creating instances of 'servermodule'
+    create(Module, Arguments) ->
     Context = Module:create(Arguments),
     {?MODULE, Module, Context}.
   
@@ -108,10 +108,10 @@ _servermodule.erl_:
 _servermodule_imp_1.erl_
 
     % Compile-time check if the implementation conforms interface
-  -behavior(servermodule).
-  
+    -behavior(servermodule).
+
     -export([callme/1]).
-  
+
     callme(Context) ->
         ok.
 
@@ -198,7 +198,7 @@ Each instance is to follow `epolymorph_instance_spec` behaviour which defines fa
 
 _ets_storage.erl_:
 
-  -behaviour(epolymorph_instance_spec).
+    -behaviour(epolymorph_instance_spec).
   
     -export([create/0, set/3, get/2, epolymorph_create/1]).
 
@@ -223,7 +223,7 @@ _redis_storage.erl_:
 
     -behaviour(epolymorph_instance_spec).
     
-  -export([create/1, set/3, get/2, epolymorph_create/1]).
+    -export([create/1, set/3, get/2, epolymorph_create/1]).
 
     epolymorph_create({RedisHost, RedisPort}) ->
         create({RedisHost, RedisPort}).
@@ -243,8 +243,8 @@ _storage.erl_:
 
     -compile({parse_transform, epolymorph_interface_pt}). % (1)
     
-  -callback get(term(), term()) -> term(). % (2)
-  -callback set(term(), term(), term()) -> ok|error.  % (3)
+    -callback get(term(), term()) -> term(). % (2)
+    -callback set(term(), term(), term()) -> ok|error.  % (3)
 
 The `epolymorph_interface_pt` transformation `(1)` walk through the callbacks `(2), (3)` and generates exported delegating methods to `storage` in the form of:
 
@@ -258,14 +258,14 @@ Also it generates exported function `create/2` which:
 
     create(Module, Arg) ->
     %
-        % That is why we need epolymorph_create in each implementation
+    % That is why we need epolymorph_create in each implementation
     %
-        case Module:epolymorph_create(Arg) of
-            {ok, Instance} ->
-                {ok, {?MODULE, Module, Instance}};
-            {error, Reason} ->
-                {error, Reason}
-        end.
+    case Module:epolymorph_create(Arg) of
+        {ok, Instance} ->
+            {ok, {?MODULE, Module, Instance}};
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 Going on!
 
@@ -273,16 +273,16 @@ Going on!
 
 1. Add polymorph as a dependency to your rebar.config:
 
-        {deps, [
-            {epolymorph, ".*", {git, "https://github.com/eldarko/epolymorph.git", {branch, "master"}}}
-        ]}.
+    {deps, [
+        {epolymorph, ".*", {git, "https://github.com/eldarko/epolymorph.git", {branch, "master"}}}
+    ]}.
         
 2. ./rebar get-deps compile
 
 ## Step 3: Add epolymorph to your project (home-made)
 
-  # git clone https://github.com/eldarko/epolymorph.git
-  # cp src/*.erl <your_project>/src
+    # git clone https://github.com/eldarko/epolymorph.git
+    # cp src/*.erl <your_project>/src
 
 ## Step 4: Use new interface in your code
 
@@ -304,8 +304,8 @@ Define abstract connection with send/2 and close/1 methods. Add two implementati
 ## Quick check
 
     # git clone https://github.com/eldarko/epolymorph.git
-  # cd epolymorph
-  # wget https://s3.amazonaws.com/rebar3/rebar3 && chmod +x rebar3
+    # cd epolymorph
+    # wget https://s3.amazonaws.com/rebar3/rebar3 && chmod +x rebar3
     # ./rebar3 as examples compile
     # ./rebar3 as examples shell
     1> connection_example:main().

@@ -22,16 +22,16 @@
 -module(epolymorph).
 -author('eldar.kononov@kaspersky.com').
 
--export([create/2]).
+-export([create/3]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
-create(Mod, Args) ->
+create(InterfaceMod, Mod, Args) ->
     case catch Mod:epolymorph_create(Args) of
         {ok, Instance} ->
-            {ok, {Mod, Instance}};
+            {ok, {InterfaceMod, Mod, Instance}};
 
         {'EXIT', {undef, [{Mod,epolymorph_create,[_],[]}|_]}} ->
             {error, {Mod, must_implement, epolymorph_instance_spec}};

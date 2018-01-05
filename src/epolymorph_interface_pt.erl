@@ -30,13 +30,13 @@ find_callbacks(Forms) ->
 generate_vars(Arity, Line) ->
   [{var, Line, list_to_atom("Var_" ++ integer_to_list(I))} || I <- lists:seq(2, Arity)].
 
-generate_function({Name, Arity}, Line) ->
+generate_function({Name, Arity}, Line, InterfaceMod) ->
   Vars = generate_vars(Arity, Line),
 
   F =
     {function,Line,Name,Arity,
       [{clause,Line,
-        [{tuple,Line,[{var,Line,'Module'},{var,Line,'Instance'}]}|Vars],
+        [{tuple,Line,[{atom,Line,InterfaceMod},{var,Line,'Module'},{var,Line,'Instance'}]}|Vars],
           [],
           [{call,Line,
             {remote,Line,
@@ -46,33 +46,36 @@ generate_function({Name, Arity}, Line) ->
 
   {F, Line + 1}.
 
-create_function_clause(Line) ->
+create_function_clause(Line, InterfaceMod) ->
   {function,Line,create,2,
     [{clause,Line,
       [{var,Line,'Mod'},{var,Line,'Args'}],
         [],
         [{call,Line,
           {remote,Line,{atom,Line,epolymorph},{atom,Line,create}},
-          [{var,Line,'Mod'},{var,Line,'Args'}]}]}]}.
+          [{atom,Line,InterfaceMod},{var,Line,'Mod'},{var,Line,'Args'}]}]}]}.
 
 add_exports({Forms, LastLine}, Callbacks) ->
   {Forms ++ [{attribute, LastLine, export, [{create,2}|Callbacks]}], LastLine + 1}.
 
-add_functions({Forms, LastLine}, Callbacks) ->
+add_functions({Forms, LastLine}, Callbacks, InterfaceMod) ->
   lists:foldl(
     fun(Callback, {Forms1, LastLine1}) ->
-      {Function, LastLine2} = generate_function(Callback, LastLine1),
+      {Function, LastLine2} = generate_function(Callback, LastLine1, InterfaceMod),
       {Forms1 ++ [Function], LastLine2}
     end,
     {Forms, LastLine},
     Callbacks).
 
-add_callbacks(Forms, Callbacks) ->
+add_callbacks(Forms, Callbacks, InterfaceMod) ->
   {Forms1, [{eof,LastLine1}]} = lists:split(length(Forms) - 1, Forms),
   {Forms2, LastLine2} = add_exports({Forms1,LastLine1}, Callbacks),
-  {Forms3, LastLine3} = add_functions({Forms2, LastLine2}, Callbacks),
+  {Forms3, LastLine3} = add_functions({Forms2, LastLine2}, Callbacks, InterfaceMod),
 
-  Forms3 ++ [create_function_clause(LastLine3), {eof, LastLine3 + 1}].
+  Forms3 ++ [create_function_clause(LastLine3, InterfaceMod), {eof, LastLine3 + 1}].
+
+find_interface_name(Forms) ->
+  hd([A || {attribute,_,module,A} <- Forms]).
 
 parse_transform(Forms, _Opts) ->
-  add_callbacks(Forms, find_callbacks(Forms)).
+  add_callbacks(Forms, find_callbacks(Forms), find_interface_name(Forms)).

@@ -6,12 +6,12 @@ Easily and clearly separate interface from implementation in Erlang
   * [Requirements](#requirements)
   * [Approach](#approach)
 - [Practice](#practice)
-  * [Step 1: Declare the interface](#step-1--declare-the-interface)
-  * [Step 2: Prepare your modules](#step-2--prepare-your-modules)
-  * [Step 3: Add epolymorph to your project (rebar)](#step-3--add-epolymorph-to-your-project--rebar-)
-  * [Step 3: Add epolymorph to your project (home-made)](#step-3--add-epolymorph-to-your-project--home-made-)
+  * [Step 1: Declare the interface](#step-1-declare-the-interface)
+  * [Step 2: Prepare your modules](#step-2-prepare-your-modules)
+  * [Step 3: Add epolymorph to your project (rebar)](#step-3-add-epolymorph-to-your-project-rebar)
+  * [Step 3: Add epolymorph to your project (home-made)](#step-3-add-epolymorph-to-your-project-home-made)
   * [Step 4: Use new interface in your code](#step-4--use-new-interface-in-your-code)
-- [Example: connection_example](#example--connection-example)
+- [Example: connection_example](#example-connection-example)
   * [Task](#task)
   * [Quick check](#quick-check)
   * [Code](#code)
@@ -207,7 +207,7 @@ The `epolymorph_interface_pt` transformation `(1)` walk through the callbacks `(
 Also it generates exported function `create/2` which:
 * expects the name of the module implementing `epolymorph_instance_spec` as a first parameter and
 * arbitrary data passed to the implementation factory method as a second parameter:
-
+*
 
      create(Module, Arg) ->
      %

@@ -190,54 +190,7 @@ _redis_storage.erl_:
     set(Conn, Key, Value) ->
         redis_command(Conn, ["SET", Key, Value]).
 
-## Step 1: Prepare your modules
-
-Prepare your modules to be instances of abstract storage.
-
-Each instance is to follow `epolymorph_instance_spec` behaviour which defines factory method `epolymorph_create/1` callback.
-
-_ets_storage.erl_:
-
-    -behaviour(epolymorph_instance_spec).
-  
-    -export([create/0, set/3, get/2, epolymorph_create/1]).
-
-    epolymorph_create(_) ->
-        create().
-
-    create() ->
-        {ok, ets:new(?MODULE, [public])}.
-
-    get(Tab, Key) ->
-        case ets:lookup(Tab, Key) of
-            [{_,Value}] ->
-                Value;
-            [] ->
-                undefined
-        end.
-
-    set(Tab, Key, Value) ->
-        ets:insert(Tab, {Key, Value}).
-
-_redis_storage.erl_:
-
-    -behaviour(epolymorph_instance_spec).
-    
-    -export([create/1, set/3, get/2, epolymorph_create/1]).
-
-    epolymorph_create({RedisHost, RedisPort}) ->
-        create({RedisHost, RedisPort}).
-        
-    create({RedisHost, RedisPort}) ->
-        {ok, open_redis_connection(RedisHost, RedisPort)}.
-        
-    get(Conn, Key) -> 
-        redis_command(Conn, ["GET", Key]).
-        
-    set(Conn, Key, Value) ->
-        redis_command(Conn, ["SET", Key, Value]).
-
-## Step 2: Declare the interface
+## Step 1: Declare the interface
 
 _storage.erl_:
 
@@ -266,6 +219,51 @@ Also it generates exported function `create/2` which:
         {error, Reason} ->
             {error, Reason}
     end.
+
+## Step 2: Prepare your modules
+
+Prepare your modules to be instances of abstract storage.
+
+Each instance is to follow `epolymorph_instance_spec` behaviour which defines factory method `epolymorph_create/1` callback.
+
+_ets_storage.erl_:
+
+    -behaviour(epolymorph_instance_spec).
+    -export([epolymorph_create/1]).
+    
+    -behaviour(storage).
+    -export([set/3, get/2]).
+  
+    epolymorph_create(_) ->
+        {ok, ets:new(?MODULE, [public])}.
+
+    get(Tab, Key) ->
+        case ets:lookup(Tab, Key) of
+            [{_,Value}] ->
+                Value;
+            [] ->
+                undefined
+        end.
+
+    set(Tab, Key, Value) ->
+        ets:insert(Tab, {Key, Value}).
+
+_redis_storage.erl_:
+
+    -behaviour(epolymorph_instance_spec).
+    -export([epolymorph_create/1]).
+    
+    -behaviour(storage).
+    -export([set/3, get/2]).
+  
+    epolymorph_create({RedisHost, RedisPort}) ->
+        {ok, open_redis_connection(RedisHost, RedisPort)}.
+                
+    get(Conn, Key) -> 
+        redis_command(Conn, ["GET", Key]).
+        
+    set(Conn, Key, Value) ->
+        redis_command(Conn, ["SET", Key, Value]).
 
 Going on!
 

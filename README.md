@@ -6,8 +6,8 @@ Easily and clearly separate interface from implementation in Erlang
   * [Requirements](#requirements)
   * [Approach](#approach)
 - [Practice](#practice)
-  * [Step 1: Prepare your modules](#step-1--prepare-your-modules)
-  * [Step 2: Declare the interface](#step-2--declare-the-interface)
+  * [Step 1: Declare the interface](#step-1--declare-the-interface)
+  * [Step 2: Prepare your modules](#step-2--prepare-your-modules)
   * [Step 3: Add epolymorph to your project (rebar)](#step-3--add-epolymorph-to-your-project--rebar-)
   * [Step 3: Add epolymorph to your project (home-made)](#step-3--add-epolymorph-to-your-project--home-made-)
   * [Step 4: Use new interface in your code](#step-4--use-new-interface-in-your-code)
@@ -209,16 +209,16 @@ Also it generates exported function `create/2` which:
 * arbitrary data passed to the implementation factory method as a second parameter:
 
 
-    create(Module, Arg) ->
-    %
-    % That is why we need epolymorph_create in each implementation
-    %
-    case Module:epolymorph_create(Arg) of
+     create(Module, Arg) ->
+     %
+     % That is why we need epolymorph_create in each implementation
+     %
+     case Module:epolymorph_create(Arg) of
         {ok, Instance} ->
             {ok, {?MODULE, Module, Instance}};
         {error, Reason} ->
             {error, Reason}
-    end.
+     end.
 
 ## Step 2: Prepare your modules
 

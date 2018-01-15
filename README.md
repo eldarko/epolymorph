@@ -204,21 +204,15 @@ The `epolymorph_interface_pt` transformation `(1)` walk through the callbacks `(
     get({?MODULE, Module,Instance}, Key, Value) ->
         Module:get(Instance, Key, Value).
 
-Also it generates exported function `create/2` which:
-* expects the name of the module implementing `epolymorph_instance_spec` as a first parameter and
-* arbitrary data passed to the implementation factory method as a second parameter:
-*
+Also it generates exported function `create/2` which expects the name of the module implementing `epolymorph_instance_spec` as a first parameter and arbitrary data passed to the implementation factory method as a second parameter.
 
      create(Module, Arg) ->
-     %
-     % That is why we need epolymorph_create in each implementation
-     %
-     case Module:epolymorph_create(Arg) of
-        {ok, Instance} ->
-            {ok, {?MODULE, Module, Instance}};
-        {error, Reason} ->
+        case Module:epolymorph_create(Arg) of
+          {ok, Instance} ->
+             {ok, {?MODULE, Module, Instance}};
+          {error, Reason} ->
             {error, Reason}
-     end.
+        end.
 
 ## Step 2: Prepare your modules
 

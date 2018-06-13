@@ -5,5 +5,3 @@
 -type instance() :: term().
 
 -callback send(instance(), binary()) -> ok|{error, Reason::term()}.
-
--callback close(instance()) -> ok.

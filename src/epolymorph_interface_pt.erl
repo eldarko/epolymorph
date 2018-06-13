@@ -55,8 +55,17 @@ create_function_clause(Line, InterfaceMod) ->
           {remote,Line,{atom,Line,epolymorph},{atom,Line,create}},
           [{atom,Line,InterfaceMod},{var,Line,'Mod'},{var,Line,'Args'}]}]}]}.
 
+delete_function_clause(Line) ->
+  {function,Line,delete,1,
+    [{clause,Line,
+      [{var,Line,'Instance'}],
+      [],
+      [{call,Line,
+        {remote,Line,{atom,Line,epolymorph},{atom,Line,delete}},
+        [{var,Line,'Instance'}]}]}]}.
+
 add_exports({Forms, LastLine}, Callbacks) ->
-  {Forms ++ [{attribute, LastLine, export, [{create,2}|Callbacks]}], LastLine + 1}.
+  {Forms ++ [{attribute, LastLine, export, [{create,2},{delete,1}|Callbacks]}], LastLine + 1}.
 
 add_functions({Forms, LastLine}, Callbacks, InterfaceMod) ->
   lists:foldl(
@@ -72,7 +81,11 @@ add_callbacks(Forms, Callbacks, InterfaceMod) ->
   {Forms2, LastLine2} = add_exports({Forms1,LastLine1}, Callbacks),
   {Forms3, LastLine3} = add_functions({Forms2, LastLine2}, Callbacks, InterfaceMod),
 
-  Forms3 ++ [create_function_clause(LastLine3, InterfaceMod), {eof, LastLine3 + 1}].
+  Forms3 ++ [
+    create_function_clause(LastLine3, InterfaceMod),
+    delete_function_clause(LastLine3+1),
+    {eof, LastLine3 + 2}
+  ].
 
 find_interface_name(Forms) ->
   hd([A || {attribute,_,module,A} <- Forms]).

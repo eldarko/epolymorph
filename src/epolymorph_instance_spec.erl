@@ -27,3 +27,6 @@
 %
 -callback epolymorph_create(Args::any()) ->
   {ok, Instance::any()} | {error, Reason::any()}.
+
+-callback epolymorph_delete(Instance::any()) ->
+  ok.

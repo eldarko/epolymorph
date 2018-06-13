@@ -161,7 +161,7 @@ You want to use the storage abstractly without knowing the exact implementation 
 
 _ets_storage.erl_:
 
-    -export([create/0, set/3, get/2]).
+    -export([create/0, set/3, get/2, delete/1]).
 
     create() ->
         {ok, ets:new(?MODULE, [public])}.
@@ -177,9 +177,12 @@ _ets_storage.erl_:
     set(Tab, Key, Value) ->
         ets:insert(Tab, {Key, Value}).
 
+    delete(Tab) ->
+        ets:delete(Tab).
+
 _redis_storage.erl_:
 
-    -export([create/1, set/3, get/2]).
+    -export([create/1, set/3, get/2, delete/1]).
 
     create({RedisHost, RedisPort}) ->
         {ok, open_redis_connection(RedisHost, RedisPort)}.
@@ -189,6 +192,9 @@ _redis_storage.erl_:
 
     set(Conn, Key, Value) ->
         redis_command(Conn, ["SET", Key, Value]).
+
+    delete(Conn)
+        redis_close(Conn).
 
 ## Step 1: Declare the interface
 
@@ -204,7 +210,7 @@ The `epolymorph_interface_pt` transformation `(1)` walk through the callbacks `(
     get({?MODULE, Module,Instance}, Key, Value) ->
         Module:get(Instance, Key, Value).
 
-Also it generates exported function `create/2` which expects the name of the module implementing `epolymorph_instance_spec` as a first parameter and arbitrary data passed to the implementation factory method as a second parameter.
+Also it generates exported functions `create/2` which expects the name of the module implementing `epolymorph_instance_spec` as a first parameter and arbitrary data passed to the implementation factory method as a second parameter. `delete/1` is also generated as opposite to `create/2`.
 
      create(Module, Arg) ->
         case Module:epolymorph_create(Arg) of
@@ -218,18 +224,21 @@ Also it generates exported function `create/2` which expects the name of the mod
 
 Prepare your modules to be instances of abstract storage.
 
-Each instance is to follow `epolymorph_instance_spec` behaviour which defines factory method `epolymorph_create/1` callback.
+Each instance is to follow `epolymorph_instance_spec` behaviour which defines factory method `epolymorph_create/1` and `epolymorph_delete/1` callbacks.
 
 _ets_storage.erl_:
 
     -behaviour(epolymorph_instance_spec).
-    -export([epolymorph_create/1]).
+    -export([epolymorph_create/1, epolymorph_delete/1]).
     
     -behaviour(storage).
     -export([set/3, get/2]).
   
     epolymorph_create(_) ->
         {ok, ets:new(?MODULE, [public])}.
+
+    epolymorph_delete(Tab) ->
+        ets:delete(Tab).
 
     get(Tab, Key) ->
         case ets:lookup(Tab, Key) of
@@ -245,7 +254,7 @@ _ets_storage.erl_:
 _redis_storage.erl_:
 
     -behaviour(epolymorph_instance_spec).
-    -export([epolymorph_create/1]).
+    -export([epolymorph_create/1, epolymorph_delete/1]).
     
     -behaviour(storage).
     -export([set/3, get/2]).
@@ -253,6 +262,9 @@ _redis_storage.erl_:
     epolymorph_create({RedisHost, RedisPort}) ->
         {ok, open_redis_connection(RedisHost, RedisPort)}.
                 
+    epolymorph_delete(Conn) ->
+        close_redis_connection(Conn).
+
     get(Conn, Key) -> 
         redis_command(Conn, ["GET", Key]).
         
@@ -285,7 +297,10 @@ Going on!
     {ok, Storage2} = storage:create(redis_storage, {"127.0.0.1", 6379}),
     
     set_single_value(Storage1),
-    set_single_value(Storage2).
+    set_single_value(Storage2),
+
+    storage:delete(Storage1),
+    storage:delete(Storage2).
 
 # Example: connection_example
 

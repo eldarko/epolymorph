@@ -22,7 +22,7 @@
 -module(epolymorph).
 -author('eldar.kononov@kaspersky.com').
 
--export([create/3]).
+-export([create/3, delete/1]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -40,13 +40,23 @@ create(InterfaceMod, Mod, Args) ->
             R
     end.
 
+delete({_InterfaceMod, Mod, Instance}) ->
+    case catch Mod:epolymorph_delete(Instance) of
+        {'EXIT', {undef, [{Mod,epolymorph_delete,[_],[]}|_]}} ->
+            {error, {Mod, must_implement, epolymorph_instance_spec}};
+
+        R ->
+            R
+    end.
+
 %============
 % EUnit tests
 %============
 -ifdef(TEST).
 
 spec_not_implemented_test() ->
-    ?assertMatch({error, {gen_server,must_implement,epolymorph_instance_spec}}, ?MODULE:create(gen_server, [])).
+    ?assertMatch({error, {gen_server,must_implement,epolymorph_instance_spec}}, ?MODULE:create(?MODULE, gen_server, [])),
+    ?assertMatch({error, {gen_server,must_implement,epolymorph_instance_spec}}, ?MODULE:delete({?MODULE, gen_server, undefined})).
 
 -endif.
 

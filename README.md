@@ -27,9 +27,9 @@ A project has a module `clientmodule` and `servermodule`. The `clientmodule` has
     func(Server) ->
       servermodule:callme(Server).
 
-So far so good, but one day your want to use another module `servermodule2` as a server. Moreover, you want to decide, which module to use somewhere outside of the  `clientmodule` scope. And the `clientmodule` should be aware which one implementation it calls.
+So far so good, but one day your want to use another module `servermodule2` as a server. Moreover, you want to decide, which module to use somewhere outside of the  `clientmodule` scope. And having such a code the `clientmodule` will be aware which implementation it calls.
 
-This is what one calls __"polymorphism"__.
+Here comes what one calls __"polymorphism"__.
 
 Quick goooogling for _"erlang polymorphism"_ gives the impression that the question is raised from time to time, but there is no well-defined and clear solution yet.
 - [erlang polymorphism: multiple implementations of the same contract](https://stackoverflow.com/questions/22313076/erlang-polymorphism-multiple-implementations-of-the-same-contract)
